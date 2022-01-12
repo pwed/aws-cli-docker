@@ -21,5 +21,4 @@ alias aws2='docker run -it --rm -e AWS_PROFILE=$AWS_PROFILE -e AWS_DEFAULT_REGIO
 
 ## TODO
 
-- test on raspbery pi for both 64 and 32 bit
-- add ssm plugin
+- fix build for arm64 awscli2. Need to compile glibc on arm using 

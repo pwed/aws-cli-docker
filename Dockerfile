@@ -8,22 +8,42 @@ FROM base AS awscliv1
 
 RUN pip install awscli
 
-FROM base AS awscliv2
+FROM alpine:latest AS awscliv2-amd64
 
-RUN apk add curl unzip gcompat git gcc python3-dev libffi-dev musl-dev cmake make openssl-dev zlib-dev
+ENV GLIBC_VER=2.31-r0
+ARG TARGETPLATFORM
 
-RUN echo "The prebuilt packages do not support alpine :(. Building from source!" && \
-    git clone https://github.com/aws/aws-cli.git && cd aws-cli && git checkout v2 && \
-    pip install -r requirements.txt && \
-    pip install -e .
+# install glibc compatibility for alpine
+RUN apk --no-cache add \
+        binutils \
+        curl \
+    && curl -sL https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub -o /etc/apk/keys/sgerrand.rsa.pub \
+    && curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-${GLIBC_VER}.apk \
+    && curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-bin-${GLIBC_VER}.apk \
+    && curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-i18n-${GLIBC_VER}.apk \
+    && curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-dev-${GLIBC_VER}.apk \
+    && apk add --no-cache \
+        glibc-${GLIBC_VER}.apk \
+        glibc-bin-${GLIBC_VER}.apk \
+        glibc-i18n-${GLIBC_VER}.apk \
+        glibc-dev-${GLIBC_VER}.apk \
+    && /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8
 
-RUN apk del curl unzip git gcc python3-dev libffi-dev musl-dev cmake make openssl-dev zlib-dev
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && aws/install \
+    && rm -rf \
+        awscliv2.zip \
+        aws \
+        /usr/local/aws-cli/v2/current/dist/aws_completer \
+        /usr/local/aws-cli/v2/current/dist/awscli/data/ac.index \
+        /usr/local/aws-cli/v2/current/dist/awscli/examples \
+        glibc-*.apk \
+    && find /usr/local/aws-cli/v2/current/dist/awscli/botocore/data -name examples-1.json -delete
 
-# ## Building from source since the packages from AWS don't support Alpine
-# RUN git clone https://github.com/aws/aws-cli.git && cd aws-cli && git checkout v2
+RUN apk --no-cache del \
+        binutils \
+        curl \
+    && rm -rf /var/cache/apk/*
 
-# RUN cd aws-cli && pip install -r requirements.txt
-
-# RUN cd aws-cli && pip install -e .
-
-# RUN apk del curl unzip git gcc python3-dev libffi-dev musl-dev cmake make openssl-dev zlib-dev
+FROM amazon/aws-cli AS awscliv2-arm64
