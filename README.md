@@ -1,5 +1,8 @@
 # aws-cli-docker
-Docker for running AWS CLI commands
+
+Docker containers for running AWS CLI commands
+
+[docker hub](https://hub.docker.com/r/pwed/awscli)
 
 ## Why
 

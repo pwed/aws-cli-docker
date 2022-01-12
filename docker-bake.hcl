@@ -7,7 +7,8 @@ target "v1" {
     pull = true
     target = "awscliv1"
     tags = ["pwed/awscli:1"]
-    platforms = ["linux/amd64", "linux/arm64", "linux/arm", "linux/arm/v7", "linux/386"]
+    platforms = ["linux/amd64", "linux/arm64", "linux/arm", "linux/arm/v7"]
+    // platforms = ["linux/arm64", "linux/arm/v7"]
 }
 
 target "v2" {
@@ -15,5 +16,6 @@ target "v2" {
     pull = true
     target = "awscliv2"
     tags = ["pwed/awscli:2", "pwed/awscli:latest"]
-    platforms = ["linux/amd64", "linux/arm64", "linux/arm", "linux/arm/v7", "linux/386"]
+    platforms = ["linux/amd64", "linux/arm64", "linux/arm", "linux/arm/v7"]
+    // platforms = ["linux/arm64", "linux/arm/v7"]
 }
